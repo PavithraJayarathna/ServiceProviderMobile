@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   static const Color primary = Color(0xFFFFA45B);        // Orange from your image
   static const Color primaryLight = Color(0xFFFFEADB); 
-  static const Color secondary = Color(0xFFE2F89C);      // Light green from your image
+  static const Color secondary = Color(0xFFFFDA77);      // Light green from your image
   static const Color accent = Color(0xFFAEE6E6);         // Light blue/teal from your image
   static const Color bg = Color(0xFFFBF6F0);             // Light cream background
   static const Color textDark = Color(0xFF000000);       // Black text

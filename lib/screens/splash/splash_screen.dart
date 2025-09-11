@@ -31,17 +31,17 @@ void initState() {
           Align(
             alignment: Alignment.bottomCenter,
             child: Image.asset(
-              "assests/images/mypic.png",
+              "assets/images/mypic.png",
               fit: BoxFit.contain,
             ),
           ),
           Positioned(
-            top: 5, // distance from top
+            top: 25, // distance from top
             left: 0,
             right: 0,
             child: Image.asset(
-              "assests/images/logo.png",
-              width: 80,
+              "assets/images/logo.png",
+              width: 450,
             ),
           ),
           

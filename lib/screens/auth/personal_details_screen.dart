@@ -1,112 +1,204 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
+import '../widgets/top_bar.dart';
+import '../widgets/custom_text_field.dart';
+import '../widgets/custom_button.dart';
 import '../widgets/progress_bar.dart';
+import 'contact_details_screen.dart';
 
-class PersonalDetailsScreen extends StatelessWidget {
-  static const route = "/personal_details";
-  const PersonalDetailsScreen({super.key});
+class RegistrationOne extends StatefulWidget {
+  const RegistrationOne({super.key});
+
+  static const route = '/registration_one';
+
+  @override
+  State<RegistrationOne> createState() => _RegistrationOneState();
+}
+
+class _RegistrationOneState extends State<RegistrationOne> {
+  final FocusNode _dropdownFocus = FocusNode();
+  final _formKey = GlobalKey<FormState>(); // 🔹 Form key for validation
+  String? _selectedProfession;
+  bool _hasFocus = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _dropdownFocus.addListener(() {
+      setState(() {
+        _hasFocus = _dropdownFocus.hasFocus;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _dropdownFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final bool isActive = _hasFocus || _selectedProfession != null;
+
+    final Color bgColor =
+        isActive ? AppColors.accent.withAlpha(50) : AppColors.bg;
+    final Color borderColor =
+        isActive ? AppColors.accent.withAlpha(50) : AppColors.borderTransparent;
+
     return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: SafeArea(
+      backgroundColor: AppColors.secondary,
+      appBar: const TopBar(),
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          color: AppColors.bg,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Logo
-              Center(
-                child: Image.asset("assests/images/logo.png", height: 60),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: Text(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Form( // 🔹 Wrap everything inside a Form
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                /// 🔹 App Title & Subtitle
+                Text(
                   "FurGlo Pro",
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                         color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
                       ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 4),
-              Center(
-                child: Text(
+                const SizedBox(height: 4),
+                const Text(
                   "Professional Pet Care Services",
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 32),
 
-              // Step Progress Indicator
-              StepProgressIndicator(
-  currentStep: 1,
-  totalSteps: 3,
-  radius: 18,
-  activeColor: AppColors.primary,
-  inactiveColor: AppColors.border,
-  lineColor: AppColors.border,
-  labels: const [
-    "Personal Details",
-    "Professional Details",
-    "Account Security",
-  ],
-),
+                const SizedBox(height: 24),
 
-              const SizedBox(height: 32),
+                /// 🔹 Step progress bar
+                const StepProgressWithLabels(currentStep: 1),
 
-              Text(
-                "Personal Details",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
+                const SizedBox(height: 32),
+
+                /// 🔹 Section Title
+                Text(
+                  "Personal Details",
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  "Let’s Start Your Basic Information",
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 32),
+
+                /// 🔹 First Name
+                const CustomTextField(
+                  label: "First Name",
+                  prefixIcon: Icons.person_outline,
+                ),
+                const SizedBox(height: 16),
+
+                /// 🔹 Last Name
+                const CustomTextField(
+                  label: "Last Name",
+                  prefixIcon: Icons.person_outline,
+                ),
+                const SizedBox(height: 16),
+
+                /// 🔹 Profession Type Dropdown (with validator)
+                DropdownButtonFormField<String>(
+                  focusNode: _dropdownFocus,
+                  initialValue: _selectedProfession,
+                  dropdownColor: AppColors.accent,
+                  items: const [
+                    DropdownMenuItem(value: "Vet", child: Text("Vet")),
+                    DropdownMenuItem(value: "Trainer", child: Text("Trainer")),
+                    DropdownMenuItem(value: "Groomer", child: Text("Groomer")),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedProfession = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "⚠ Please select your profession type"; // 🔹 Error msg under field
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    labelText: "Profession Type",
+                    labelStyle: TextStyle(
+                      color:
+                          isActive ? AppColors.primary : AppColors.textMedium,
+                      fontWeight:
+                          isActive ? FontWeight.bold : FontWeight.normal,
                     ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "Let's Start Your Basic Information",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+                    prefixIcon: const Icon(
+                      Icons.work_outline,
+                      color: AppColors.textMedium,
+                    ),
+                    filled: true,
+                    fillColor: bgColor,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: borderColor, width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: AppColors.accent.withAlpha(50),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
 
-              const SizedBox(height: 24),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: "First Name",
-                  prefixIcon: const Icon(Icons.person_outline),
+                const Spacer(),
+
+                /// 🔹 Next Button
+                CustomButton(
+                  text: "Next",
+                  icon: Icons.arrow_forward,
+                  iconPosition: IconPosition.end,
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const RegistrationTwo(),
+                        ),
+                      );
+                    }
+                  },
+                  isPrimary: true,
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: "Last Name",
-                  prefixIcon: const Icon(Icons.person_outline),
-                ),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: "Select Your Profession Type",
-                  prefixIcon: Icon(Icons.badge_outlined),
-                ),
-                items: const [
-                  DropdownMenuItem(value: "vet", child: Text("Veterinarian")),
-                  DropdownMenuItem(value: "trainer", child: Text("Trainer")),
-                ],
-                onChanged: (v) {},
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, "/contact_details");
-                },
-                child: const Text("Next  →"),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-

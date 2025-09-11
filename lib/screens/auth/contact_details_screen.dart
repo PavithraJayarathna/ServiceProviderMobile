@@ -1,134 +1,147 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
-import '../widgets/progress_bar.dart'; // Import the new progress bar widget
+import '../widgets/top_bar.dart';
+import '../widgets/custom_text_field.dart';
+import '../widgets/custom_button.dart';
+import '../widgets/progress_bar.dart';
+import '../widgets/mobile_number_field.dart'; // <-- import here
+import 'verify_phone_screen.dart';
 
-class ContactDetailsScreen extends StatelessWidget {
-  static const route = "/contact_details";
-  const ContactDetailsScreen({super.key});
+class RegistrationTwo extends StatelessWidget {
+  const RegistrationTwo({super.key});
+
+  static const route = '/registration_two';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: SafeArea(
+      backgroundColor: AppColors.secondary,
+      appBar: const TopBar(),
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          color: AppColors.bg,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Center(child: Image.asset("assests/images/logo.png", height: 60)),
-              const SizedBox(height: 16),
-              Center(
-                child: Text(
-                  "FurGlo Pro",
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Center(
-                child: Text(
-                  "Professional Pet Care Services",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Use the new StepProgressBar widget
-              StepProgressIndicator(
-                currentStep: 1,
-                totalSteps: 3,
-                radius: 18,
-                activeColor: AppColors.primary,
-                inactiveColor: AppColors.border,
-                lineColor: AppColors.border,
-                
-                labels: const [
-                  "Personal Details",
-                  "Professional Details",
-                  "Account Security",
-                ],
-              ),
-              const SizedBox(height: 32),
-
+              /// 🔹 App Title & Subtitle
               Text(
-                "Contact Details",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                "FurGlo Pro",
+                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                       color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.bold,
                     ),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
-              Text(
-                "Tell us about your contact details",
-                style: Theme.of(context).textTheme.bodyMedium,
+              const Text(
+                "Professional Pet Care Services",
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
               ),
 
               const SizedBox(height: 24),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 80,
-                    child: TextField(
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.flag),
-                        labelText: "+94",
-                      ),
+
+              /// 🔹 Step progress bar
+              const StepProgressWithLabels(currentStep: 2),
+
+              const SizedBox(height: 32),
+
+              /// 🔹 Section Title
+              Text(
+                "Contact Details",
+                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.phone),
-                        labelText: "0700000000",
-                      ),
-                    ),
-                  ),
-                ],
               ),
-              const SizedBox(height: 16),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: "Email Address",
-                  prefixIcon: const Icon(Icons.email_outlined),
-                ),
+              const SizedBox(height: 4),
+              const Text(
+                "Tell us about your contact details",
+                style: TextStyle(color: AppColors.primary),
               ),
+
+              const SizedBox(height: 24),
+
+              /// 🔹 Mobile Number (reusable widget)
+              const MobileNumberField(),
+
               const SizedBox(height: 16),
+
+              /// 🔹 Email Address
+              const CustomTextField(
+                label: "Email Address",
+                prefixIcon: Icons.email,
+                keyboardType: TextInputType.emailAddress,
+              ),
+
+              const SizedBox(height: 16),
+
+              /// 🔹 Info Box (OTP message)
               Container(
+                width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.secondary.withAlpha(80),
+                  color: AppColors.accent.withAlpha(20),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Row(
-                  children: const [
-                    Icon(Icons.sms_outlined),
+                child: const Row(
+                  children: [
+                    Icon(Icons.smartphone, color: Colors.teal, size: 20),
                     SizedBox(width: 8),
                     Expanded(
-                        child: Text(
-                            "We'll send an OTP to verify your number")),
+                      child: Text(
+                        "We'll send an OTP to verify your number",
+                        style: TextStyle(
+                          color: AppColors.textLight,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
+
               const Spacer(),
+
+              /// 🔹 Action Buttons
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("← Back"),
+                    child: CustomButton(
+                      text: "Back",
+                      icon: Icons.arrow_back,
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      isPrimary: false,
+                      textColor: AppColors.primary,
+                      iconColor: AppColors.primary,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: ElevatedButton(
+                    child: CustomButton(
+                      text: "Send OTP",
                       onPressed: () {
-                        Navigator.pushNamed(context, "/verify_phone");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const VerifyPhoneScreen(),
+                          ),
+                        );
                       },
-                      child: const Text("Send OTP"),
+                      isPrimary: true,
                     ),
                   ),
                 ],
