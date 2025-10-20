@@ -12,7 +12,8 @@ class CustomButton extends StatelessWidget {
   final Color? textColor;
   final Color? iconColor;
   final TextStyle? textStyle;
-  final Widget? iconWidget; // 👈 custom icon widget (eg: Google logo)
+  final Widget? iconWidget; // 👈 custom icon widget (e.g. Google logo)
+  final Color? backgroundColor; // 👈 NEW: allows custom background color
 
   const CustomButton({
     super.key,
@@ -25,6 +26,7 @@ class CustomButton extends StatelessWidget {
     this.iconColor,
     this.textStyle,
     this.iconWidget,
+    this.backgroundColor, // 👈 add to constructor
   });
 
   @override
@@ -38,7 +40,8 @@ class CustomButton extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: isPrimary ? AppColors.primary : AppColors.bg,
+          backgroundColor: backgroundColor ??
+              (isPrimary ? AppColors.primary : AppColors.bg),
           minimumSize: const Size(double.infinity, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -46,13 +49,13 @@ class CustomButton extends StatelessWidget {
                 ? BorderSide.none
                 : const BorderSide(color: AppColors.primary, width: 1.5),
           ),
+          elevation: 0, // keeps modern flat look
         ),
         onPressed: onPressed,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
-            // 👇 priority ekak denna
             if (iconWidget != null) ...[
               iconWidget!,
               const SizedBox(width: 8),
@@ -69,7 +72,7 @@ class CustomButton extends StatelessWidget {
                 style: textStyle ??
                     TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16, // default
+                      fontSize: 16,
                       color: effectiveTextColor,
                     ),
               ),

@@ -17,7 +17,7 @@ class RegistrationOne extends StatefulWidget {
 
 class _RegistrationOneState extends State<RegistrationOne> {
   final FocusNode _dropdownFocus = FocusNode();
-  final _formKey = GlobalKey<FormState>(); // 🔹 Form key for validation
+  final _formKey = GlobalKey<FormState>(); // Form key for validation
   String? _selectedProfession;
   bool _hasFocus = false;
 
@@ -60,12 +60,11 @@ class _RegistrationOneState extends State<RegistrationOne> {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Form( // 🔹 Wrap everything inside a Form
+          child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                /// 🔹 App Title & Subtitle
                 Text(
                   "FurGlo Pro",
                   style: Theme.of(context).textTheme.headlineSmall!.copyWith(
@@ -86,12 +85,12 @@ class _RegistrationOneState extends State<RegistrationOne> {
 
                 const SizedBox(height: 24),
 
-                /// 🔹 Step progress bar
+                /// Step progress bar
                 const StepProgressWithLabels(currentStep: 1),
 
                 const SizedBox(height: 32),
 
-                /// 🔹 Section Title
+                /// Section Title
                 Text(
                   "Personal Details",
                   style: Theme.of(context).textTheme.titleLarge!.copyWith(
@@ -112,25 +111,39 @@ class _RegistrationOneState extends State<RegistrationOne> {
 
                 const SizedBox(height: 32),
 
-                /// 🔹 First Name
-                const CustomTextField(
+                /// First Name
+                CustomTextField(
                   label: "First Name",
                   prefixIcon: Icons.person_outline,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "⚠ Please enter your first name";
+                    }
+                    return null;
+                  },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                 ),
                 const SizedBox(height: 16),
 
-                /// 🔹 Last Name
-                const CustomTextField(
+                /// Last Name
+                CustomTextField(
                   label: "Last Name",
                   prefixIcon: Icons.person_outline,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "⚠ Please enter your last name";
+                    }
+                    return null;
+                  },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                 ),
                 const SizedBox(height: 16),
 
-                /// 🔹 Profession Type Dropdown (with validator)
+                /// Profession Dropdown
                 DropdownButtonFormField<String>(
                   focusNode: _dropdownFocus,
-                  initialValue: _selectedProfession,
-                  dropdownColor: AppColors.accent,
+                  value: _selectedProfession,
+                  dropdownColor: Colors.white,
                   items: const [
                     DropdownMenuItem(value: "Vet", child: Text("Vet")),
                     DropdownMenuItem(value: "Trainer", child: Text("Trainer")),
@@ -143,15 +156,17 @@ class _RegistrationOneState extends State<RegistrationOne> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "⚠ Please select your profession type"; // 🔹 Error msg under field
+                      return "⚠ Please select your profession type";
                     }
                     return null;
                   },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   decoration: InputDecoration(
                     labelText: "Profession Type",
                     labelStyle: TextStyle(
-                      color:
-                          isActive ? AppColors.primary : AppColors.textMedium,
+                      color: isActive
+                          ? AppColors.primary
+                          : AppColors.textMedium,
                       fontWeight:
                           isActive ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -177,7 +192,7 @@ class _RegistrationOneState extends State<RegistrationOne> {
 
                 const Spacer(),
 
-                /// 🔹 Next Button
+                /// Next Button
                 CustomButton(
                   text: "Next",
                   icon: Icons.arrow_forward,

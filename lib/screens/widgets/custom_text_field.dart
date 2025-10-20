@@ -4,18 +4,26 @@ import '../../core/app_colors.dart';
 class CustomTextField extends StatefulWidget {
   final String label;
   final IconData? prefixIcon;
-  final bool isPassword; // 👈 new flag (to auto handle toggle)
+  final bool isPassword;
   final TextInputType keyboardType;
-  final String? errorText; // 👈 validation support
+  final String? errorText;
+  final ValueChanged<String>? onChanged;
+  final FormFieldValidator<String>? validator;
+  final AutovalidateMode? autovalidateMode;
+  final TextEditingController? controller;
 
   const CustomTextField({
-    super.key,
+    Key? key,
     required this.label,
     this.prefixIcon,
     this.isPassword = false,
     this.keyboardType = TextInputType.text,
     this.errorText,
-  });
+    this.onChanged,
+    this.validator,
+    this.autovalidateMode,
+    this.controller,
+  }) : super(key: key);
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -23,15 +31,17 @@ class CustomTextField extends StatefulWidget {
 
 class _CustomTextFieldState extends State<CustomTextField> {
   final FocusNode _focusNode = FocusNode();
-  final TextEditingController _controller = TextEditingController();
-
+  late final TextEditingController _controller;
   bool _hasFocus = false;
   bool _hasText = false;
-  bool _obscure = false; // 👈 local state for password toggle
+  late bool _obscure;
+  bool get _externalController => widget.controller != null;
 
   @override
   void initState() {
     super.initState();
+    _controller = widget.controller ?? TextEditingController();
+    _obscure = widget.isPassword;
 
     _focusNode.addListener(() {
       setState(() {
@@ -43,34 +53,37 @@ class _CustomTextFieldState extends State<CustomTextField> {
       setState(() {
         _hasText = _controller.text.isNotEmpty;
       });
+      if (widget.onChanged != null) widget.onChanged!(_controller.text);
     });
-
-    _obscure = widget.isPassword; // 👈 init based on `isPassword`
   }
 
   @override
   void dispose() {
     _focusNode.dispose();
-    _controller.dispose();
+    if (!_externalController) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final bool isActive = _hasFocus || _hasText;
-
     final Color bgColor =
         isActive ? AppColors.accent.withAlpha(50) : AppColors.bg;
-    final Color borderColor =
-        isActive ? AppColors.accent.withAlpha(50) : AppColors.borderTransparent;
+    final Color borderColor = isActive
+        ? AppColors.accent.withAlpha(50)
+        : AppColors.borderTransparent;
 
-    return TextField(
+    return TextFormField(
       controller: _controller,
       focusNode: _focusNode,
       obscureText: _obscure,
       keyboardType: widget.keyboardType,
       cursorColor: AppColors.primary,
       style: const TextStyle(color: AppColors.textDark),
+      validator: widget.validator,
+      autovalidateMode: widget.autovalidateMode,
       decoration: InputDecoration(
         labelText: widget.label,
         labelStyle: TextStyle(
@@ -82,23 +95,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
             : null,
         suffixIcon: widget.isPassword
             ? GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _obscure = !_obscure;
-                  });
-                },
+                onTap: () => setState(() => _obscure = !_obscure),
                 child: Icon(
                   _obscure ? Icons.visibility : Icons.visibility_off,
                   color: AppColors.textMedium,
                 ),
               )
             : null,
-
-        // Background dynamic
         filled: true,
         fillColor: bgColor,
-
-        // Borders dynamic
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: borderColor, width: 1.5),
@@ -107,11 +112,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: AppColors.accent, width: 2),
         ),
-
-        // Validation
         errorText: widget.errorText,
       ),
+      onChanged: widget.onChanged,
     );
   }
 }
-

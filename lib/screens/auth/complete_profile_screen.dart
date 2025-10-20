@@ -1,19 +1,99 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/app_colors.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/top_bar_withoutlog.dart'; // top bar import
 
-class CompleteProfile extends StatelessWidget {
+class CompleteProfile extends StatefulWidget {
   const CompleteProfile({super.key});
 
   static const route = '/complete_profile';
 
   @override
+  State<CompleteProfile> createState() => _CompleteProfileState();
+}
+
+class _CompleteProfileState extends State<CompleteProfile> {
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage(ImageSource source) async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: source,
+      imageQuality: 80, // compress little
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+
+  /// Show picker as CENTER dialog with close button
+  void _showPickerOptions() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          titlePadding:
+              const EdgeInsets.only(left: 16, right: 8, top: 12, bottom: 0),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Choose Option",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary, // ✅ primary color
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close, color: Colors.red),
+                onPressed: () {
+                  Navigator.pop(context); // close dialog
+                },
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading:
+                    Icon(Icons.photo_library, color: AppColors.accent), // ✅ accent
+                title: const Text("Gallery"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading:
+                    Icon(Icons.camera_alt, color: AppColors.secondary), // ✅ secondary
+                title: const Text("Camera"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bg,
-      appBar: const TopBar(), // <-- Top bar eka use karanawa
+      appBar: const TopBar(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -42,26 +122,35 @@ class CompleteProfile extends StatelessWidget {
               // Profile picture upload
               Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 32,
                     backgroundColor: AppColors.primaryLight,
-                    child: Icon(Icons.person, size: 40, color: AppColors.textLight),
+                    backgroundImage: _image != null ? FileImage(_image!) : null,
+                    child: _image == null
+                        ? const Icon(Icons.person,
+                            size: 40, color: AppColors.textLight)
+                        : null,
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.borderTransparent),
-                        borderRadius: BorderRadius.circular(12),
-                        color: AppColors.bg,
-                      ),
-                      child: Row(
-                        children: const [
-                          Icon(Icons.camera_alt, color: AppColors.textMedium),
-                          SizedBox(width: 8),
-                          Text("Upload Photo"),
-                        ],
+                    child: GestureDetector(
+                      onTap: _showPickerOptions,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 14),
+                        decoration: BoxDecoration(
+                          border:
+                              Border.all(color: AppColors.borderTransparent),
+                          borderRadius: BorderRadius.circular(12),
+                          color: AppColors.bg,
+                        ),
+                        child: Row(
+                          children: const [
+                            Icon(Icons.camera_alt, color: AppColors.textMedium),
+                            SizedBox(width: 8),
+                            Text("Upload Photo"),
+                          ],
+                        ),
                       ),
                     ),
                   ),

@@ -17,9 +17,43 @@ class RegistrationThree extends StatefulWidget {
 
 class _RegistrationThreeState extends State<RegistrationThree> {
   bool agreed = false;
+  String password = "";
+
+  int getPasswordStrength(String pass) {
+    int strength = 0;
+
+    // Conditions
+    if (pass.length >= 8) strength++;
+    if (RegExp(r'[A-Z]').hasMatch(pass)) strength++;
+    if (RegExp(r'[a-z]').hasMatch(pass)) strength++;
+    if (RegExp(r'[0-9]').hasMatch(pass)) strength++;
+    if (RegExp(r'[!@#\$&*~^%+=.?_-]').hasMatch(pass)) strength++;
+
+    return strength; // range 0–5
+  }
 
   @override
   Widget build(BuildContext context) {
+    int strength = getPasswordStrength(password);
+
+    // Strength colors & labels
+    Color strengthColor;
+    String strengthText;
+
+    if (strength == 0) {
+      strengthColor = AppColors.textMedium;
+      strengthText = "";
+    } else if (strength < 3) {
+      strengthColor = AppColors.secondary;
+      strengthText = "Weak";
+    } else if (strength < 5) {
+      strengthColor = AppColors.primary;
+      strengthText = "Medium";
+    } else {
+      strengthColor = AppColors.success;
+      strengthText = "Strong";
+    }
+
     return Scaffold(
       backgroundColor: AppColors.secondary,
       appBar: const TopBar(),
@@ -79,11 +113,16 @@ class _RegistrationThreeState extends State<RegistrationThree> {
 
               const SizedBox(height: 24),
 
-              /// Password field
-              const CustomTextField(
+              /// Password field with onChanged
+              CustomTextField(
                 label: "Password",
                 prefixIcon: Icons.lock,
                 isPassword: true,
+                onChanged: (val) {
+                  setState(() {
+                    password = val;
+                  });
+                },
               ),
 
               /// Strength bar + label
@@ -91,19 +130,19 @@ class _RegistrationThreeState extends State<RegistrationThree> {
               Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: AppColors.success,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                    child: LinearProgressIndicator(
+                      value: (strength / 5),
+                      minHeight: 6,
+                      borderRadius: BorderRadius.circular(4),
+                      backgroundColor: Colors.grey[300],
+                      valueColor: AlwaysStoppedAnimation(strengthColor),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    "Strong",
+                  Text(
+                    strengthText,
                     style: TextStyle(
-                      color: AppColors.success,
+                      color: strengthColor,
                       fontWeight: FontWeight.bold,
                     ),
                   )
@@ -177,11 +216,11 @@ class _RegistrationThreeState extends State<RegistrationThree> {
                       isPrimary: false,
                       textColor: AppColors.primary,
                       iconColor: AppColors.primary,
-                      textStyle: const TextStyle( // 👈 smaller text
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
-                    ),
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -209,8 +248,7 @@ class _RegistrationThreeState extends State<RegistrationThree> {
                                 ),
                               );
                             },
-
-                            textStyle: const TextStyle( // 👈 bigger text
+                      textStyle: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -231,7 +269,7 @@ class _RegistrationThreeState extends State<RegistrationThree> {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
                       "or",
-                      style: TextStyle(color:AppColors.primary),
+                      style: TextStyle(color: AppColors.primary),
                     ),
                   ),
                   const Expanded(
@@ -245,16 +283,14 @@ class _RegistrationThreeState extends State<RegistrationThree> {
               /// Sign Up with Google
               CustomButton(
                 text: "Sign Up With Google",
-                
                 onPressed: () {},
                 isPrimary: false,
                 textColor: AppColors.primary,
-                
                 iconWidget: Image.asset(
-                "assets/images/Google.png",
-                height: 20,
-                width: 20,
-              ),
+                  "assets/images/Google.png",
+                  height: 20,
+                  width: 20,
+                ),
               ),
 
               const SizedBox(height: 16),

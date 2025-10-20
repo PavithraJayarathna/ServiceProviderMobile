@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../widgets/custom_button.dart';
-import '../auth/personal_details_screen.dart';
+//import '../auth/personal_details_screen.dart';
+//import '../appointments/appointments_screen.dart';
+//import '../notification/notification_screen.dart';
+//import '../review/review_screen.dart';
+import '../Billing & Payments/billing_screen.dart';
+//import '../Billing & Payments/invoices_list_screen.dart';
 
 class OnboardingScreen extends StatelessWidget {
   static const route = "/onboarding";
@@ -77,7 +82,7 @@ class OnboardingScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const RegistrationOne(),
+                              builder: (context) => const BillingPaymentScreen(),
                             ),
                           );
                         },

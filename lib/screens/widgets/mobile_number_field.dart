@@ -4,12 +4,16 @@ import '../../core/app_colors.dart';
 class MobileNumberField extends StatefulWidget {
   final String label;
   final String initialCountryCode;
-  final Function(String)? onChanged;
+  final FormFieldValidator<String>? validator;
+  final AutovalidateMode? autovalidateMode;
+  final ValueChanged<String>? onChanged;
 
   const MobileNumberField({
     super.key,
     this.label = "Mobile Number",
     this.initialCountryCode = "+94",
+    this.validator,
+    this.autovalidateMode,
     this.onChanged,
   });
 
@@ -18,55 +22,56 @@ class MobileNumberField extends StatefulWidget {
 }
 
 class _MobileNumberFieldState extends State<MobileNumberField> {
-  final FocusNode _phoneFocusNode = FocusNode();
-  final TextEditingController _phoneController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  final TextEditingController _controller = TextEditingController();
 
   bool _hasFocus = false;
-  bool _hasText = false;
   late String _countryCode;
+
+  final List<String> _countryCodes = const ["+94", "+91", "+1"];
 
   @override
   void initState() {
     super.initState();
     _countryCode = widget.initialCountryCode;
 
-    _phoneFocusNode.addListener(() {
+    _focusNode.addListener(() {
       setState(() {
-        _hasFocus = _phoneFocusNode.hasFocus;
+        _hasFocus = _focusNode.hasFocus;
       });
     });
 
-    _phoneController.addListener(() {
-      setState(() {
-        _hasText = _phoneController.text.isNotEmpty;
-      });
-      if (widget.onChanged != null) {
-        widget.onChanged!("$_countryCode${_phoneController.text}");
-      }
-    });
+    _controller.addListener(_notifyChange);
+  }
+
+  void _notifyChange() {
+    if (widget.onChanged != null) {
+      widget.onChanged!("$_countryCode${_controller.text}");
+    }
   }
 
   @override
   void dispose() {
-    _phoneFocusNode.dispose();
-    _phoneController.dispose();
+    _focusNode.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isActive = _hasFocus || _hasText;
+    final bool isActive = _hasFocus || _controller.text.isNotEmpty;
+
     final Color bgColor =
-        isActive ? AppColors.accent.withAlpha(50) : AppColors.bg;
+        isActive ? AppColors.accent.withAlpha(40) : AppColors.bg;
     final Color borderColor =
-        isActive ? AppColors.accent.withAlpha(50) : AppColors.borderTransparent;
+        isActive ? AppColors.accent : AppColors.borderTransparent;
 
     return Row(
       children: [
-        /// Country code dropdown
+        /// Country Code Selector
         Container(
           width: 90,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(12),
@@ -75,39 +80,42 @@ class _MobileNumberFieldState extends State<MobileNumberField> {
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: _countryCode,
-              items: const [
-                DropdownMenuItem(value: "+94", child: Text("+94")),
-                DropdownMenuItem(value: "+91", child: Text("+91")),
-                DropdownMenuItem(value: "+1", child: Text("+1")),
-              ],
+              isExpanded: true,
+              items: _countryCodes
+                  .map((code) =>
+                      DropdownMenuItem(value: code, child: Text(code)))
+                  .toList(),
               onChanged: (value) {
                 setState(() {
-                  _countryCode = value ?? "+94";
+                  _countryCode = value ?? widget.initialCountryCode;
                 });
+                _notifyChange();
               },
               icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
-              style: const TextStyle(color: Colors.grey, fontSize: 16),
+              style: const TextStyle(color: Colors.black, fontSize: 16),
             ),
           ),
         ),
         const SizedBox(width: 12),
 
-        /// Phone number input with dynamic label
+        /// Phone Number Field
         Expanded(
-          child: TextField(
-            controller: _phoneController,
-            focusNode: _phoneFocusNode,
+          child: TextFormField(
+            controller: _controller,
+            focusNode: _focusNode,
             keyboardType: TextInputType.phone,
             cursorColor: AppColors.primary,
             style: const TextStyle(color: AppColors.textDark),
+            validator: widget.validator,
+            autovalidateMode: widget.autovalidateMode,
             decoration: InputDecoration(
-              labelText: widget.label, // 👈 label ekath InputDecoration eke
+              labelText: widget.label,
               labelStyle: TextStyle(
                 color: isActive ? AppColors.primary : AppColors.textMedium,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
               prefixIcon: const Icon(Icons.phone, color: Colors.grey),
-              hintText: "0700000000",
+              hintText: "70 000 0000",
               hintStyle: const TextStyle(color: Colors.grey),
               filled: true,
               fillColor: bgColor,
@@ -124,6 +132,7 @@ class _MobileNumberFieldState extends State<MobileNumberField> {
                 ),
               ),
             ),
+            onChanged: (val) => _notifyChange(),
           ),
         ),
       ],
