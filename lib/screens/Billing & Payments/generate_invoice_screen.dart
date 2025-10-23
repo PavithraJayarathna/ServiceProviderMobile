@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_colors.dart';
 import '../widgets/top_bar_withoutlog.dart';
 import '../widgets/custom_button.dart';
@@ -49,11 +50,16 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     });
   }
 
-  void _showAddServiceDialog() {
+  void _showAddServiceDialog() async {
+    final prefs = await SharedPreferences.getInstance();
+    final defaultFee = prefs.getString('default_fee') ?? "0";
+    final defaultTax = prefs.getString('default_tax') ?? "0";
+    final defaultDiscount = prefs.getString('default_discount') ?? "0";
+
     final typeController = TextEditingController();
-    final amountController = TextEditingController();
-    final taxController = TextEditingController(text: "6");
-    final discountController = TextEditingController(text: "0");
+    final amountController = TextEditingController(text: defaultFee);
+    final taxController = TextEditingController(text: defaultTax);
+    final discountController = TextEditingController(text: defaultDiscount);
 
     showDialog(
       context: context,

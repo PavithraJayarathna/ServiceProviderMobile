@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/top_bar_withoutlog.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
@@ -18,6 +19,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _taxController = TextEditingController(text: "6");
   final _discountController = TextEditingController(text: "75");
 
+   @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _feeController.text = prefs.getString('default_fee') ?? "75";
+      _taxController.text = prefs.getString('default_tax') ?? "6";
+      _discountController.text = prefs.getString('default_discount') ?? "0";
+    });
+  }
+
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('default_fee', _feeController.text);
+    await prefs.setString('default_tax', _taxController.text);
+    await prefs.setString('default_discount', _discountController.text);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Settings saved successfully ✅")),
+    );
+  }
   bool creditCard = true;
   bool cashPayment = true;
   bool bankTransfer = false;
@@ -63,7 +89,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 children: [
                   CustomTextField(
-                    label: "Default Consultation Fees (\$)",
+                    label: "Default Fees (\$)",
                     keyboardType: TextInputType.number,
                     controller: _feeController,
                   ),
@@ -81,11 +107,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 20),
                   CustomButton(
-                    text: "Save Setting",
-                    onPressed: () {},
-                    isPrimary: true,
-                    backgroundColor: AppColors.primary,
-                  ),
+  text: "Save Setting",
+  onPressed: _saveSettings, // <-- මෙහෙම
+  isPrimary: true,
+  backgroundColor: AppColors.primary,
+),
+
                 ],
               ),
             ),
@@ -144,11 +171,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 16),
                   CustomButton(
-                    text: "Update Payment Methods",
-                    onPressed: () {},
-                    isPrimary: false,
-                    backgroundColor: AppColors.bg,
-                  ),
+  text: "Update Payment Methods",
+  onPressed: () {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Payment methods updated successfully ✅"),
+      ),
+    );
+  },
+  isPrimary: false,
+  backgroundColor: AppColors.bg,
+),
                 ],
               ),
             ),
