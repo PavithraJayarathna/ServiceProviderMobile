@@ -7,6 +7,9 @@ class CustomTextField extends StatefulWidget {
   final bool isPassword;
   final TextInputType keyboardType;
   final String? errorText;
+  final bool enabled;
+  final bool readOnly;          // 👈 add this
+  final VoidCallback? onTap; 
   final ValueChanged<String>? onChanged;
   final FormFieldValidator<String>? validator;
   final AutovalidateMode? autovalidateMode;
@@ -19,6 +22,9 @@ class CustomTextField extends StatefulWidget {
     this.isPassword = false,
     this.keyboardType = TextInputType.text,
     this.errorText,
+    this.enabled = true,
+    this.readOnly = false,      // 👈 default false
+    this.onTap,
     this.onChanged,
     this.validator,
     this.autovalidateMode,
@@ -79,6 +85,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
       controller: _controller,
       focusNode: _focusNode,
       obscureText: _obscure,
+      enabled: widget.enabled,
+      readOnly: widget.readOnly,       // 👈 add this
+  onTap: widget.onTap,
       keyboardType: widget.keyboardType,
       cursorColor: AppColors.primary,
       style: const TextStyle(color: AppColors.textDark),

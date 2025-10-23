@@ -29,14 +29,35 @@ class CreateInvoiceScreen extends StatefulWidget {
 }
 
 class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
-  final invoiceNoController = TextEditingController(text: "INV - 005");
-  final invoiceDateController = TextEditingController(text: "01/15/1990");
-  final dueDateController = TextEditingController(text: "01/20/1990");
+  final invoiceNoController = TextEditingController();
+  final invoiceDateController = TextEditingController();
+  final dueDateController = TextEditingController();
   final clientNameController = TextEditingController();
   final petNameController = TextEditingController();
 
   List<ServiceItem> services = [];
   double totalAmount = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNextInvoiceNumber();
+  }
+
+  Future<void> _loadNextInvoiceNumber() async {
+  final prefs = await SharedPreferences.getInstance();
+  // 👇 Remove old saved number for testing first invoice
+  //await prefs.remove('last_invoice_number'); 
+
+  final lastNumber = prefs.getInt('last_invoice_number') ?? 0;
+  final nextNumber = lastNumber + 1;
+  final formatted = nextNumber.toString().padLeft(4, '0');
+
+  setState(() {
+    invoiceNoController.text = "INV - $formatted";
+  });
+}
+
 
   void _calculateTotal() {
     double total = 0.0;
@@ -162,24 +183,51 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                       child: CustomTextField(
                         label: "Invoice Number",
                         controller: invoiceNoController,
+                        
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
-                      child: CustomTextField(
-                        label: "Invoice Date",
-                        controller: invoiceDateController,
-                        prefixIcon: Icons.calendar_today,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                CustomTextField(
-                  label: "Due Date",
-                  controller: dueDateController,
-                  prefixIcon: Icons.calendar_today,
-                ),
+                      Expanded(
+          child: CustomTextField(
+            label: "Invoice Date",
+            controller: invoiceDateController,
+            prefixIcon: Icons.calendar_today,
+            readOnly: true, // type කරන්න බැහැ
+            onTap: () async {
+              final pickedDate = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+              );
+              if (pickedDate != null) {
+                invoiceDateController.text =
+                    "${pickedDate.month.toString().padLeft(2,'0')}/${pickedDate.day.toString().padLeft(2,'0')}/${pickedDate.year}";
+              }
+            },
+          ),
+        ),
+      ],
+    ),
+    const SizedBox(height: 16),
+    CustomTextField(
+      label: "Due Date",
+      controller: dueDateController,
+      prefixIcon: Icons.calendar_today,
+      readOnly: true,
+      onTap: () async {
+        final pickedDate = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now().add(const Duration(days: 7)), // default due after 7 days
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+        if (pickedDate != null) {
+          dueDateController.text =
+              "${pickedDate.month.toString().padLeft(2,'0')}/${pickedDate.day.toString().padLeft(2,'0')}/${pickedDate.year}";
+        }
+      },
+    ),
                 const SizedBox(height: 16),
                 CustomTextField(
                   label: "Client Name",
@@ -217,7 +265,6 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                 ),
               ),
               children: [
-                // 🔹 Added Services List
                 if (services.isEmpty)
                   const Text("No services added yet.",
                       style: TextStyle(color: AppColors.textLight))
@@ -304,7 +351,45 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                 Expanded(
                   child: CustomButton(
                     text: "Generate Invoice",
-                    onPressed: () {},
+                    onPressed: () async {
+                      if (clientNameController.text.isEmpty ||
+                          petNameController.text.isEmpty ||
+                          services.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                "Please fill all required fields and add at least one service"),
+                          ),
+                        );
+                        return;
+                      }
+
+                      // ✅ Save last invoice number
+                      final prefs = await SharedPreferences.getInstance();
+                      final currentNo = int.tryParse(
+                            invoiceNoController.text.split('-').last.trim(),
+                          ) ??
+                          0;
+                      await prefs.setInt('last_invoice_number', currentNo);
+
+                      final newInvoice = {
+                        "id": invoiceNoController.text,
+                        "date": invoiceDateController.text,
+                        "pet": petNameController.text,
+                        "owner": clientNameController.text,
+                        "service":
+                            services.map((s) => s.type).join(", "),
+                        "payment": "Pending",
+                        "amount": totalAmount.toStringAsFixed(2),
+                        "tax": services
+                            .fold(0.0, (sum, s) => sum + s.tax)
+                            .toStringAsFixed(2),
+                        "total": totalAmount.toStringAsFixed(2),
+                        "isPaid": false,
+                      };
+
+                      Navigator.pop(context, newInvoice);
+                    },
                     isPrimary: true,
                     backgroundColor: AppColors.primary,
                   ),
@@ -341,7 +426,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: .05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),

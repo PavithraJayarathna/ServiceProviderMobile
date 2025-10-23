@@ -91,14 +91,21 @@ class _BillingPaymentScreenState extends State<BillingPaymentScreen> {
               width: 160,
               child: CustomButton(
                 text: "Generate Invoice",
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CreateInvoiceScreen(),
-                    ),
-                  );
-                },
+               onPressed: () async {
+  final newInvoice = await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const CreateInvoiceScreen(),
+    ),
+  );
+
+  if (newInvoice != null && mounted) {
+    setState(() {
+      invoices.insert(0, newInvoice); // 👈 අලුත් invoice එක ඉහළට add වෙනවා
+    });
+  }
+},
+
                 backgroundColor: AppColors.primary,
               ),
             ),
