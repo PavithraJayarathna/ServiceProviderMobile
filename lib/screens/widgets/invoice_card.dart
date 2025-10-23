@@ -103,12 +103,16 @@ class InvoiceCard extends StatelessWidget {
                 ),
               if (!isPaid) const SizedBox(width: 8),
               Expanded(
-                child: CustomButton(
-                  text: "PDF",
-                  onPressed: () {},
-                  isPrimary: false,
-                ),
-              ),
+  child: CustomButton(
+    text: "PDF",
+    icon: Icons.download, 
+    onPressed: () {
+      // PDF download logic එක මෙතන
+    },
+    isPrimary: false,
+  ),
+),
+
               const SizedBox(width: 8),
               Expanded(
                 child: CustomButton(

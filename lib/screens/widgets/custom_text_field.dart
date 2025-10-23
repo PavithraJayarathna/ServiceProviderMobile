@@ -8,7 +8,8 @@ class CustomTextField extends StatefulWidget {
   final TextInputType keyboardType;
   final String? errorText;
   final bool enabled;
-  final bool readOnly;          // 👈 add this
+  final bool readOnly;
+  final IconData? icon;         
   final VoidCallback? onTap; 
   final ValueChanged<String>? onChanged;
   final FormFieldValidator<String>? validator;
@@ -23,8 +24,9 @@ class CustomTextField extends StatefulWidget {
     this.keyboardType = TextInputType.text,
     this.errorText,
     this.enabled = true,
-    this.readOnly = false,      // 👈 default false
+    this.readOnly = false,
     this.onTap,
+    this.icon,
     this.onChanged,
     this.validator,
     this.autovalidateMode,
@@ -66,17 +68,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   void dispose() {
     _focusNode.dispose();
-    if (!_externalController) {
-      _controller.dispose();
-    }
+    if (!_externalController) _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final bool isActive = _hasFocus || _hasText;
-    final Color bgColor =
-        isActive ? AppColors.accent.withAlpha(50) : AppColors.bg;
+    final Color bgColor = isActive ? AppColors.accent.withAlpha(50) : AppColors.bg;
     final Color borderColor = isActive
         ? AppColors.accent.withAlpha(50)
         : AppColors.borderTransparent;
@@ -86,8 +85,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
       focusNode: _focusNode,
       obscureText: _obscure,
       enabled: widget.enabled,
-      readOnly: widget.readOnly,       // 👈 add this
-  onTap: widget.onTap,
+      readOnly: widget.readOnly,
+      onTap: widget.onTap,
       keyboardType: widget.keyboardType,
       cursorColor: AppColors.primary,
       style: const TextStyle(color: AppColors.textDark),
@@ -110,7 +109,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
                   color: AppColors.textMedium,
                 ),
               )
-            : null,
+            : widget.icon != null
+                ? Icon(widget.icon, color: AppColors.textMedium)
+                : null,
         filled: true,
         fillColor: bgColor,
         enabledBorder: OutlineInputBorder(
