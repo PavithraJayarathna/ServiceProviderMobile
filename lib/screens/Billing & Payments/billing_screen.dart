@@ -126,7 +126,7 @@ class _BillingPaymentScreenState extends State<BillingPaymentScreen> {
             Expanded(
               child: _StatCard(
                 title: "Paid Invoices",
-                value: "", // temporarily empty, filled below
+                value: "", // filled dynamically
                 subtitle: "Out of Total",
               ),
             ),
@@ -229,6 +229,11 @@ class _BillingPaymentScreenState extends State<BillingPaymentScreen> {
               tax: invoice["tax"],
               total: invoice["total"],
               isPaid: invoice["isPaid"],
+              onMarkPaid: () {
+                setState(() {
+                  invoice["isPaid"] = true;
+                });
+              },
             ),
           ),
       ],
@@ -266,11 +271,14 @@ class _StatCard extends StatelessWidget {
               style:
                   const TextStyle(color: AppColors.textMedium, fontSize: 14)),
           const SizedBox(height: 8),
-          Text(value.isEmpty ? "-" : value,
-              style: const TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold)),
+          Text(
+            value.isEmpty ? "-" : value,
+            style: const TextStyle(
+              color: AppColors.primary,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 4),
           Text(subtitle,
               style:
